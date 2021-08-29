@@ -3,6 +3,7 @@ require('dotenv').config()
 const Discord = require('discord.js')
 const fs = require('fs')
 const { sequelize } = require('./lib/models.js')
+if (!fs.existsSync('./blobs')) fs.mkdirSync('./blobs')
 class NotAutoTSSClient extends Discord.Client {
 	/**
 	 * NotAutoTSS Client
