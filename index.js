@@ -24,11 +24,15 @@ for (const commandFile of fs.readdirSync('./commands')) {
 client.once('ready', () => {
 	console.log('Ready!');
 });
-client.on('interactionCreate', interation => {
+client.on('interactionCreate', async interation => {
 	if (!interation.isCommand()) return
-	if (interation.options.getSubcommand(false)) 
-		client.commands.get(interation.commandName).subcommands[interation.options.getSubcommand()].execute(interation)
-	else
-		client.commands.get(interation.commandName).execute(interation)
+	try {
+		if (interation.options.getSubcommand(false))
+			await client.commands.get(interation.commandName).subcommands[interation.options.getSubcommand()].execute(interation)
+		else
+			await client.commands.get(interation.commandName).execute(interation)
+	} catch (error) {
+		console.error(`Error occured in command ` + interation.commandName + ':\n' + error.stack)
+	}
 })
 client.login(process.env.BOT_TOKEN)

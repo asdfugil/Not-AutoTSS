@@ -1,11 +1,10 @@
-const { CommandInteraction, Interaction } = require('discord.js')
+const { CommandInteraction, MessageEmbed } = require('discord.js')
 const { sequelize, device } = require('../lib/models.js')
 const { spawnSync } = require('child_process');
 const MAX_DEVICES = parseInt(process.env.MAX_DEVICES)
 const tmpdir = require('os').tmpdir()
 const fs = require('fs')
 const { store } = require('../lib/tss.js');
-const random = require('../lib/random.js');
 module.exports = {
     name: 'devices',
     subcommands: {
@@ -33,10 +32,45 @@ module.exports = {
                 const boardconfig = interaction.options.getString('boardconfig')
                 await device.upsert({
                     model, ecid, generator, apnonce, boardconfig,
+                    name: interaction.options.getString('name'),
                     owner: interaction.user.id
                 })
-                store(generator,ecid,apnonce,boardconfig,model) 
+                store(generator, ecid, apnonce, boardconfig, model)
                 interaction.reply({ ephemeral: true, content: 'Device added and saving blobs.' })
+            }
+        },
+        list: {
+            /**
+             * 
+             * @param { CommandInteraction } interaction 
+             */
+            async execute(interaction) {
+                const owned_devices = await device.findAll({ where: { owner: interaction.user.id }, raw: true })
+                if (owned_devices.length === 0) return interaction.reply(`You didn\'t have any device added to Not-AutoTSS. Add at least one device and try again.`)
+                let devices_string = ''
+                for (const device of owned_devices) {
+                    let blobs_count = 0
+                    // speed up
+                    const blobs_count_array = await Promise.all(fs.readdirSync(`./blobs/${device.ecid}`).map(async version => {
+                        const buildids = await fs.promises.readdir(`./blobs/${device.ecid}/${version}`)
+                        return buildids.length
+                    }))
+                    for (const count of blobs_count_array) {
+                        blobs_count += count
+                    }
+                    devices_string += `Name: ${device.name}
+Model: ${device.model}
+ECID: ||${device.ecid}||
+Blobs count: ${blobs_count}
+Generator(s): \`${device.generator || '0xbd34a880be0b53f3, 0x1111111111111111'}\`
+APNonce: ${device.apnonce || 'None'}`
+                }
+                const embed = new MessageEmbed()
+                    .setDescription(devices_string)
+                    .setTitle(interaction.user.tag + "'s devices")
+                    .setColor(0xffffff)
+                    .setTimestamp()
+                interaction.reply({ embeds: [embed], ephemeral: true })
             }
         }
     }
