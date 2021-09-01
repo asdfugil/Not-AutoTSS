@@ -47,7 +47,10 @@ module.exports = {
             async execute(interaction) {
                 const owned_devices = await device.findAll({ where: { owner: interaction.user.id }, raw: true })
                 if (owned_devices.length === 0) return interaction.reply(`You didn\'t have any device added to Not-AutoTSS. Add at least one device and try again.`)
-                let devices_string = ''
+                const embed = new MessageEmbed()
+                    .setTitle(interaction.user.tag + "'s devices")
+                    .setColor(0xffffff)
+                    .setTimestamp()
                 for (const device of owned_devices) {
                     let blobs_count = 0
                     // speed up
@@ -58,18 +61,16 @@ module.exports = {
                     for (const count of blobs_count_array) {
                         blobs_count += count
                     }
-                    devices_string += `Name: ${device.name}
+
+                    let device_string = `Name: ${device.name}
 Model: ${device.model}
 ECID: ||${device.ecid}||
 Blobs count: ${blobs_count}
 Generator(s): \`${device.generator || '0xbd34a880be0b53f3, 0x1111111111111111'}\`
-APNonce: ${device.apnonce || 'None'}`
+APNonce: ${device.apnonce || 'None'}
+`
+                    embed.addField(device.name, device_string)
                 }
-                const embed = new MessageEmbed()
-                    .setDescription(devices_string)
-                    .setTitle(interaction.user.tag + "'s devices")
-                    .setColor(0xffffff)
-                    .setTimestamp()
                 interaction.reply({ embeds: [embed], ephemeral: true })
             }
         }
