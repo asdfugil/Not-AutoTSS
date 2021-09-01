@@ -1,9 +1,12 @@
 const { CommandInteraction, Interaction } = require('discord.js')
 const { sequelize, device } = require('../lib/models.js')
+const { spawnSync } = require('child_process');
 const MAX_DEVICES = parseInt(process.env.MAX_DEVICES)
+const tmpdir = require('os').tmpdir()
 const fs = require('fs')
 const fetch = require('node-fetch')
-const { save } = require('../lib/tss.js')
+const { save } = require('../lib/tss.js');
+const random = require('../lib/random.js');
 module.exports = {
     name: 'devices',
     subcommands: {
@@ -45,15 +48,22 @@ module.exports = {
                     .then(response => response.json())
                     .then(json => json.filter(x => x.signed))
                 for (gen of generators) {
-                    const blobs = await Promise.all(signed_fw.map(fw => save({ model, ecid, generator:gen, apnonce, boardconfig, buildid: fw.buildid, version: fw.version })))
-                    for (const blob in blobs) {
+                    const blobs = await Promise.all(signed_fw.map(fw => {
+                        const filename = `${random()}.plist`
+                        const manifest = `${tmpdir}/${filename}`
+                        spawnSync(process.env.PZB_PATH, ['-g', 'BuildManifest.plist', '-o', manifest, fw.url], { pwd: require('os').tmpdir() })
+                        const promise = save({ model, ecid, generator: gen, apnonce, boardconfig, buildid: fw.buildid, version: fw.version, manifest: filename })
+                        fs.unlinkSync(filename)
+                        return promise
+                    }))
+                    for (const blob of blobs) {
                         const blob_save_path = `./blobs/${ecid.toString(16)}/${blob.version}/${blob.buildid}${apnonce ? `/apnonce-${apnonce}` : ''}`
-                        if (!fs.existsSync(blob_save_path)) fs.mkdirSync(blob_save_path)
-                        fs.writeFileSync(`${blob_save_path}/${gen.toString(16)}_${ecid.toString(16)}.shsh2`)
+                        if (!fs.existsSync(blob_save_path)) fs.mkdirSync(blob_save_path, { recursive: true })
+                        fs.writeFileSync(blob_save_path + '/' +blob.name, blob.ticket)
                         console.log(`Saved blob`)
                     }
                 }
-                interaction.reply('Device added.')
+                interaction.followUp({ ephemeral: true, content: 'Device added and saved blobs.' })
             }
         }
     }
