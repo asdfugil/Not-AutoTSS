@@ -73,6 +73,21 @@ APNonce: ${device.apnonce || 'None'}
                 }
                 interaction.reply({ embeds: [embed], ephemeral: true })
             }
+        },
+        remove: {
+            /**
+            * 
+            * @param { CommandInteraction } interaction 
+            */
+            async execute(interaction) {
+                const die = await device.findOne({ where: { owner: interaction.user.id, name: interaction.options.getString('name') }, raw: true })
+                const count = await device.destroy({ where: { owner: interaction.user.id, name: interaction.options.getString('name') } })
+                if (count === 0) return interaction.reply('Incoorect device name')
+                else {
+                    if (fs.existsSync(`./blobs/${die.ecid}`)) fs.rmSync(`./blobs/${die.ecid}`, { recursive: true })
+                    interaction.reply('Device removed')
+                }
+            }
         }
     }
 }

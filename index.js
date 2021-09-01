@@ -3,6 +3,7 @@ require('dotenv').config()
 const Discord = require('discord.js')
 const fs = require('fs')
 const { sequelize } = require('./lib/models.js')
+const save_all = require('./lib/save_all.js')
 if (!fs.existsSync('./blobs')) fs.mkdirSync('./blobs')
 class NotAutoTSSClient extends Discord.Client {
 	/**
@@ -23,6 +24,7 @@ for (const commandFile of fs.readdirSync('./commands')) {
 }
 client.once('ready', () => {
 	console.log('Ready!');
+	save_all()
 });
 client.on('interactionCreate', async interation => {
 	if (!interation.isCommand()) return
@@ -35,4 +37,5 @@ client.on('interactionCreate', async interation => {
 		console.error(`Error occured in command ` + interation.commandName + ':\n' + error.stack)
 	}
 })
+setInterval(save_all,86400000)
 client.login(process.env.BOT_TOKEN)
