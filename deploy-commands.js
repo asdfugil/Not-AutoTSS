@@ -45,9 +45,9 @@ const commands = [
 				})
 				.addStringOption(option => {
 					return option
-					.setName('apnonce')
-					.setDescription('Device APNonce. This MUST match the generator.')
-					.setRequired(false)
+						.setName('apnonce')
+						.setDescription('Device APNonce. This MUST match the generator.')
+						.setRequired(false)
 				})
 		})
 		.addSubcommand(subcommand => {
@@ -66,7 +66,24 @@ const commands = [
 						.setRequired(true)
 				})
 		}),
-	new SlashCommandBuilder().setName('tss').setDescription('Controls the TSS Saver'),
+	new SlashCommandBuilder()
+		.setName('tss')
+		.setDescription('Controls the TSS Saver')
+		.addSubcommand(subcommand => {
+			return subcommand
+				.setName('save')
+				.setDescription('Save blobs for all your devices')
+		})
+		.addSubcommand(subcommand => {
+			return subcommand
+				.setName('download')
+				.setDescription('Download your blobs for all your devices.')
+		})
+		.addSubcommand(subcommand => {
+			return subcommand
+				.setName('list')
+				.setDescription('List SHSH blobs saved for all your devices.')
+		}),
 	new SlashCommandBuilder()
 		.setName('misc')
 		.setDescription('Print miscellaneous information')
