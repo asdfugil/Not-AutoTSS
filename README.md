@@ -2,9 +2,13 @@
 
 ## Status
 
+- [x] Ping
+- [ ] Info
 - [x] Add/Remove device
 - [x] List devices
-- [x] Blob saving
+- [x] Auto Blob saving
+- [ ] Manual blob saving
+- [ ] List blobs
 - [ ] Download blobs
 - [ ] Input validation
 
