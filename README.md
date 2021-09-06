@@ -8,6 +8,7 @@
 - [x] List devices
 - [x] Auto Blob saving
 - [ ] Manual blob saving
+- [ ] Detect signing parties
 - [ ] List blobs
 - [ ] Download blobs
 - [ ] Input validation
