@@ -10,7 +10,7 @@
 - [ ] Manual blob saving
 - [ ] Detect signing parties
 - [ ] List blobs
-- [ ] Download blobs
+- [x] Download blobs
 - [ ] Input validation
 
 ## License
