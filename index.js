@@ -16,14 +16,19 @@ class NotAutoTSSClient extends Discord.Client {
 	}
 }
 const client = new NotAutoTSSClient({
-	intents: []
+	intents: [],
+	allowedMentions: {
+		parse: [ 'users' ]
+	}
 })
 for (const commandFile of fs.readdirSync('./commands')) {
 	const command = require('./commands/' + commandFile)
 	client.commands.set(command.name, command)
 }
-client.once('ready', () => {
+client.once('ready', async () => {
 	console.log('Ready!');
+	client.attachment_channel = await client.channels.fetch(process.env.ATTACHMENT_CHANNEL_ID, { allowUnknownGuild: true })
+	console.log(client.attachment_channel.send);
 	save_all()
 });
 client.on('interactionCreate', async interation => {
