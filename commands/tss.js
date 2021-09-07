@@ -14,7 +14,7 @@ module.exports = {
 			* @param { CommandInteraction } intercation
 			*/
 			async execute(interaction) {
-				await interaction.deferReply()
+				await interaction.deferReply({ ephemeral: true })
 				const name = interaction.options.getString('name')
 				const devices = await device.findAll({ where: { owner: interaction.user.id }, raw: true })
 				if (!devices?.[0]) return interaction.followUp(`There are no devices`)
@@ -45,7 +45,7 @@ module.exports = {
 						.setColor('#660000')
 						.setTitle('Download blobs')
 						.setDescription(`[Click here](${info.files[0].url}) (${info.files[0].size/1048576} MB)\n\nThis link is valid for 48 hours.`)
-					interaction.followUp({ embeds: [ embed ] , ephemeral: true })
+					interaction.followUp({ embeds: [ embed ], ephemeral: true })
 				})
 				zip.generateNodeStream({ type: 'nodebuffer' }).pipe(stdin);
 			}

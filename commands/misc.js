@@ -5,10 +5,12 @@ module.exports = {
         ping: {
                 /**
      * 
-     * @param { CommandInteraction } interation 
+     * @param { CommandInteraction } interaction 
      */
-            execute(interation) {
-                interation.reply(`Pong! \`${interation.client.ws.ping}ms\``)
+            async execute(interaction) {
+		const now = Date.now()
+		const msg = await interaction.reply("Pinging...");
+                interaction.editReply(`Pong! \nMessage round trip: \`${Date.now() - now}ms\`\nWebsocket ping: \`${interaction.client.ws.ping}ms\``)
             }
         }
     },
