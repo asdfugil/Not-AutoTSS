@@ -27,8 +27,6 @@ for (const commandFile of fs.readdirSync('./commands')) {
 }
 client.once('ready', async () => {
 	console.log('Ready!');
-	client.attachment_channel = await client.channels.fetch(process.env.ATTACHMENT_CHANNEL_ID, { allowUnknownGuild: true })
-	console.log(client.attachment_channel.send);
 	save_all()
 });
 client.on('interactionCreate', async interation => {

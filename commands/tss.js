@@ -4,6 +4,7 @@ const { existsSync } = require('fs')
 const JSZip = require('jszip');
 const fs = require('fs')
 const fetch = require('node-fetch');
+const { exec } = require('child_process')
 module.exports = {
 	name: 'tss',
 	subcommands: {
@@ -36,16 +37,17 @@ module.exports = {
 						}
 					}
 
-					console.log(dev.ecid)
 				}
-				const msg = await interaction.client.attachment_channel.send({
-					files: [new MessageAttachment(await zip.generateAsync({type:'nodebuffer'}),'blobs.zip')]
+				const { stdin } = exec(`${process.env.CURL_PATH} -o- -F 'files[]=@-;filename=shsh_blobs.zip' -A Not-AutoTSS/0 -X POST https://tmp.ninja/upload.php`,{},function(error,stdout,stderr) {
+					const info = JSON.parse(stdout.toString('utf8'))
+					if (info.success === false) interaction.followUp(`Unable to upload blobs: ${info.message}`)
+					const embed = new MessageEmbed()
+						.setColor('#660000')
+						.setTitle('Download blobs')
+						.setDescription(`[Click here](${info.files[0].url}) (${info.files[0].size/1048576} MB)\n\nThis link is valid for 48 hours.`)
+					interaction.followUp({ embeds: [ embed ] , ephemeral: true })
 				})
-				console.log(msg.attachments.first().url)
-				interaction.followUp({
-					embeds: [new MessageEmbed().setDescription(msg.attachments.first().url)],
-					ephemeral: true
-				})
+				zip.generateNodeStream({ type: 'nodebuffer' }).pipe(stdin);
 			}
 		}
 	}
